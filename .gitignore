@@ -1,0 +1,15 @@
+.Xauthority
+.bash_history
+.bash_logout
+.bashrc
+.cache/
+.cockroachsql_history
+.gitconfig
+.profile
+.rnd
+.ssh/
+.sudo_as_admin_successful
+.vim/
+.viminfo
+/backups/
+/setup/keys/
