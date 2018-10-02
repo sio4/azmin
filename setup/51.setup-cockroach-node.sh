@@ -2,30 +2,59 @@
 #
 # sub script for cockroach node
 
-## configuration for cockroach version
+set -e
+
+# -- configuration for cockroach node
 host=`hostname -f`
 addr=`hostname -i`
+arch_name=`ls -d cockroach-v*`
 
-## installation environment
-root=/opt/cockroach
-bin=$root/cockroach
+[ "$arch_name" = "" ] && {
+	echo "arch_name detection failed!" >&2
+	exit 1
+}
 
-[ -d "$root" ] && sudo mv $root $root.`date +%Y%m%d_%H%M%S`
+# -- installation structure
+data="/var/lib/cockroach"
+root="/opt/cockroach"
+bin="$root/cockroach"
+
+
+
+# -- install cockroach package and setup structure
+echo "install $arch_name..."
+sudo rm -rf /opt/$arch_name
+sudo mv $arch_name /opt/
+sudo chown -R root.root /opt/$arch_name
 
 sudo mkdir -p $root/certs
-sudo mkdir -p /var/lib/cockroach
+sudo mkdir -p $data
 sudo chown -R $USER $root
-sudo chown -R $USER /var/lib/cockroach
-chmod -R 750 $root
-chmod -R 750 /var/lib/cockroach
-ln -s /var/lib/cockroach $root/data
-mv cockroach $root/cockroach
-mv cockroach.service $root/
-mv certs/* $root/certs/
-rmdir certs
-sudo mv cockroach.ufw /etc/ufw/applications.d/cockroach
-sudo chown root.root /etc/ufw/applications.d/cockroach
+sudo chown -R $USER $data
+chmod 750 $root
+chmod 750 $root/certs
+chmod 750 $data
 
+[ -e "$root/data" ] || ln -s $data $root/data
+[ -h "$root/cockroach" ] && rm -f $root/cockroach
+[ -e "$root/cockroach" ] && mv $root/cockroach $root/cockroach.old
+ln -s /opt/$arch_name/cockroach $root/cockroach
+
+for f in certs/*; do
+	if [ -e "$root/$f" ]; then
+		echo "- file $root/$f already exists. skip." >&2
+	else
+		mv $f $root/certs/
+	fi
+done
+chmod 600 $root/certs/*
+rm -rf certs
+
+echo "install system files..."
+sudo mv -f cockroach.ufw /etc/ufw/applications.d/cockroach
+sudo chown root.root /etc/ufw/applications.d/cockroach
 sudo ufw allow from any to any app CockroachDB
 
+mv -f cockroach.service $root/
 sudo systemctl enable $root/cockroach.service
+
