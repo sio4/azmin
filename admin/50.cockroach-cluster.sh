@@ -4,13 +4,14 @@
 # https://www.cockroachlabs.com/docs/stable/install-cockroachdb.html
 
 # -- get node list from /etc/hosts
-nodes=`grep store- /etc/hosts`
+nodes=`grep crdb- /etc/hosts`
 mode=$@
 
 [ "$mode" = "" ] && {
-	echo "usage: $0 start|stop"
+	echo "usage: $0 start|stop|restart|reload"
 	exit
 }
+
 
 OIFS=$IFS
 IFS=$'\n'
