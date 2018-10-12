@@ -51,7 +51,7 @@ chmod 700 keys
 if [ ! -e "keys/ca.key" ]; then
 	$bin cert create-ca --certs-dir=$root/certs --ca-key=keys/ca.key
 fi
-if [ ! -e "$root/certs/ca.crt" ]; then
+if [ ! -e "$root/certs/client.root.crt" ]; then
 	$bin cert create-client root --certs-dir=$root/certs --ca-key=keys/ca.key
 fi
 
